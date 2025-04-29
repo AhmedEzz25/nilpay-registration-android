@@ -24,8 +24,6 @@ fun LoginScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
-
-        // Mobile number input
         OutlinedTextField(
             value = state.phoneNumber.textFieldValue,
             onValueChange = { pushEvent(LoginContract.UiAction.OnPhoneNumberTextChanged(it.text)) },
@@ -36,7 +34,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Password input
         OutlinedTextField(
             value = state.password.textFieldValue,
             onValueChange = { text ->
@@ -50,7 +47,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Login Button
         Button(
             onClick = { pushEvent(LoginContract.UiAction.OnLoginClicked) },
             modifier = Modifier
