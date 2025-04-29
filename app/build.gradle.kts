@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("com.google.dagger.hilt.android")
     kotlin("kapt")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
+
 }
 
 android {

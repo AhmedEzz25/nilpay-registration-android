@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">nilpay-registration-android</string>
+    <string name="enter_your_phone_number">Please enter your phone number</string>
+    <string name="mobile_number">Mobile number\n</string>
+    <string name="enter_your_password">Please enter your password\n</string>
+    <string name="password">Password\n</string>
 </resources>
