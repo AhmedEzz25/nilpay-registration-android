@@ -110,8 +110,8 @@ fun RegistrationFormContent(
                     
                     item {
                         CustomTextField(
-                            value = state.mobileNo,
-                            onValueChange = { pushEvent(RegistrationFormContract.UiAction.UpdateMobileNo(it)) },
+                            value = state.mobile,
+                            onValueChange = { pushEvent(RegistrationFormContract.UiAction.UpdateMobile(it)) },
                             placeholder = "Mobile No."
                         )
                     }
@@ -168,9 +168,9 @@ fun RegistrationFormContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Checkbox(
-                                checked = state.numberOfFamilyMembers,
+                                checked = state.isFamily,
                                 onCheckedChange = { 
-                                    pushEvent(RegistrationFormContract.UiAction.UpdateNumberOfFamilyMembers(it)) 
+                                    pushEvent(RegistrationFormContract.UiAction.UpdateIsFamily(it))
                                 },
                                 colors = CheckboxDefaults.colors(
                                     checkedColor = Color.Blue,
@@ -200,7 +200,7 @@ fun RegistrationFormContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             CustomTextField(
-                                value = state.nationalIdPhoto?.toString() ?: "",
+                                value = state.nationalIdPhotoUri?.toString() ?: "",
                                 onValueChange = { /* Read only field */ },
                                 placeholder = "National ID Photo",
                                 modifier = Modifier.weight(1f),

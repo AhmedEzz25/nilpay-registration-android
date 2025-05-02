@@ -1,4 +1,4 @@
-package com.example.nilpay_registration_android.presentation.ui.screens
+package com.example.nilpay_registration_android.presentation.ui.screens.login
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

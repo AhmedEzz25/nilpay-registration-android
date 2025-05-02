@@ -5,7 +5,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
-import com.example.nilpay_registration_android.presentation.ui.screens.RegistrationApp
+import com.example.nilpay_registration_android.presentation.navigation.RegistrationApp
 
 
 @AndroidEntryPoint
