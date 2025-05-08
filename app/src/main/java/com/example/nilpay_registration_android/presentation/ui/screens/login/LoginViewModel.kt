@@ -19,8 +19,7 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val tokenManager: TokenManager,
-
-    ) : ViewModel() {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -42,7 +41,8 @@ class LoginViewModel @Inject constructor(
                         is BaseResult.DataState -> {
                             if (result.items!!.success) {
                                 result.items.data.token.let { token ->
-                                    tokenManager.saveToken(token)
+                                    tokenManager.saveToken(token = token)
+                                    tokenManager.saveUserId(userId = result.items.data.userId)
                                 }
                                 _uiState.update {
                                     it.copy(

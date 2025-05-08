@@ -1,5 +1,6 @@
 package com.example.nilpay_registration_android.core.di
 
+import com.example.nilpay_registration_android.core.data.TokenManager
 import com.example.nilpay_registration_android.data.datasource.local.CustomerDao
 import com.example.nilpay_registration_android.data.datasource.remote.AppApi
 import com.example.nilpay_registration_android.data.repository.AppRepositoryImpl
@@ -24,7 +25,8 @@ object AppModule {
     @Provides
     fun provideRepository(
         appApi: AppApi,
+        tokenManager: TokenManager
     ): AppRepository {
-        return AppRepositoryImpl(appApi)
+        return AppRepositoryImpl(appApi,tokenManager)
     }
 }

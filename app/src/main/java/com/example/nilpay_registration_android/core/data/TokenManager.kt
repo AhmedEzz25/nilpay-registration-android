@@ -14,6 +14,7 @@ class TokenManager @Inject constructor(@ApplicationContext private val context: 
 
     companion object {
         private const val TOKEN_KEY = "auth_token"
+        private const val USER_ID_KEY = "auth_user_id"
     }
 
     fun saveToken(token: String) {
@@ -22,5 +23,12 @@ class TokenManager @Inject constructor(@ApplicationContext private val context: 
 
     fun getToken(): String? {
         return sharedPreferences.getString(TOKEN_KEY, null)
+    }
+    fun saveUserId(userId: String){
+        sharedPreferences.edit { putString(USER_ID_KEY, userId) }
+
+    }
+    fun getUserId(): String? {
+        return sharedPreferences.getString(USER_ID_KEY, null)
     }
 }

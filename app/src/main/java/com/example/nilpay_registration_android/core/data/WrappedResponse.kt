@@ -4,7 +4,14 @@ data class WrappedResponse<T>(
     var success: Boolean,
     var message: String,
     var statusCode: Int,
-    var data: T
+    var data: T,
+)
+
+data class WrappedResponseList<T>(
+    var success: Boolean,
+    var message: String,
+    var statusCode: Int,
+    var data: List<T>,
 )
 
 data class WrappedErrorResponse(

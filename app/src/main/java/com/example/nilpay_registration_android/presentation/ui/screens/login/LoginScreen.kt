@@ -1,5 +1,6 @@
 package com.example.nilpay_registration_android.presentation.ui.screens.login
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +49,7 @@ fun LoginScreen(
 ) {
     if (isLoggedIn) onNavigateDashboard()
     var passwordVisible by remember { mutableStateOf(false) }
+
 
     Box(
         modifier = Modifier
@@ -103,7 +105,8 @@ fun LoginScreen(
                             Icon(imageVector = image, contentDescription = description)
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 )
 
                 uiState.error?.let {
@@ -125,14 +128,22 @@ fun LoginScreen(
                             .height(24.dp), // control button height
                         contentAlignment = Alignment.Center
                     ) {
-                        if (uiState.isLoading)
-                            CircularProgressIndicator()
-                        else
-                            Text(stringResource(R.string.label_login))
+                        Text(stringResource(R.string.label_login))
                     }
                 }
             }
 
+        }
+    }
+
+    if (uiState.isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.4f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = Color.White)
         }
     }
 }

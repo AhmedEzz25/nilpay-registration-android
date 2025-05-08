@@ -1,5 +1,7 @@
 package com.example.nilpay_registration_android.presentation.ui.screens.addcustomer
 
+import java.io.File
+
 data class CustomerFormState(
     val fullName: String = "",
     val dob: String = "",
@@ -10,10 +12,14 @@ data class CustomerFormState(
     val address: String = "",
     val isFamily: Boolean = false,
     val numFamily: Int = 0,
-    val other: String = "",
+    val other: String? = null,
     val nationalId: String = "",
-    val personalPhotoPath: String = "",
-    val nationalIdPhotoPath: String = "",
+    val personalPhotoFile: File? = null,
+    val personalPhotoPathURL: String? = null,
+    val nationalIdPhotoFile: File? = null,
+    val nationalIdPhotoPathURL: String? = null,
+    val termsPhotoFile: File? = null,
+    val termsPhotoPathURL: String? = null,
     val qrCodeValue: String = "test",
     val pin: String = "",
     val repin: String = "",
@@ -24,4 +30,18 @@ data class CustomerFormState(
     val error: String? = null,
     val isSubmittedSucceeded: Boolean = false,
     val isSavedLocallySucceeded: Boolean = false,
+    val repinError: String? = null,
+    val pinError: String? = null,
+    val fullNameError: String? = null,
+    val dobError: String? = null,
+    val emailError: String? = null,
+    val mobileError: String? = null,
+    val nationalIdError: String? = null,
+    val cityError: String? = null,
+    val addressError: String? = null,
+    val genderError: String? = null,
+    val familyCountError: String? = null,
+    val personalPhotoError: String? = null,
+    val nationalIdPhotoError: String? = null,
+    val qrCodeError: String? = null,
 )

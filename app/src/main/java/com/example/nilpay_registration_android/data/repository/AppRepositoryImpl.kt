@@ -1,10 +1,15 @@
 package com.example.nilpay_registration_android.data.repository
 
+import android.content.SharedPreferences
 import com.example.nilpay_registration_android.core.data.BaseResult
+import com.example.nilpay_registration_android.core.data.TokenManager
 import com.example.nilpay_registration_android.core.data.WrappedErrorResponse
 import com.example.nilpay_registration_android.core.data.WrappedResponse
+import com.example.nilpay_registration_android.core.data.WrappedResponseList
 import com.example.nilpay_registration_android.data.datasource.remote.AppApi
 import com.example.nilpay_registration_android.domain.model.Customer
+import com.example.nilpay_registration_android.domain.model.ReportsResponse
+import com.example.nilpay_registration_android.domain.model.UploadFileResponse
 import com.example.nilpay_registration_android.domain.repository.AppRepository
 import com.example.nilpay_registration_android.presentation.ui.screens.login.LoginRequest
 import com.example.nilpay_registration_android.presentation.ui.screens.login.LoginResponse
@@ -12,12 +17,19 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.Response
+import java.io.File
+import java.net.URI
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class AppRepositoryImpl @Inject constructor(
     private val api: AppApi,
+    private val tokenManager: TokenManager,
 ) : AppRepository {
 
     override suspend fun saveCustomer(customer: Customer): Result<Unit> {
@@ -64,6 +76,42 @@ class AppRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun uploadFile(file: URI): Flow<Response<UploadFileResponse>> {
+        return flow {
+            val fileObject = File(file.path)
+
+            val requestFile = fileObject.asRequestBody("image/*".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("file", fileObject.name, requestFile)
+
+            val response = api.uploadImage(body)
+            if (response.isSuccessful) {
+                emit(response)
+            } else {
+                val errorBody = response.errorBody()?.charStream()
+                val type = object : TypeToken<WrappedErrorResponse>() {}.type
+                val errorResponse: WrappedErrorResponse = Gson().fromJson(errorBody, type)
+                emit(response)
+            }
+        }
+    }
+
+    override suspend fun getReports(
+    ): Flow<BaseResult<WrappedResponseList<ReportsResponse>>> {
+        return flow {
+            val response = api.getReports(status = "Accepted", tokenManager.getUserId()!!)
+            if (response.isSuccessful) {
+                val body = response.body()!!
+                emit(BaseResult.DataState(body))
+            } else {
+                val errorBody = response.errorBody()?.charStream()
+                val type = object : TypeToken<WrappedErrorResponse>() {}.type
+                val errorResponse: WrappedErrorResponse =
+                    Gson().fromJson(errorBody, type)
+                emit(BaseResult.ErrorState(errorResponse))
+            }
+        }
+    }
+
     private suspend fun saveToLocalStorage(customer: Customer) {
         // Implementation depends on your DataStore setup
         // This is a simplified example
@@ -71,4 +119,5 @@ class AppRepositoryImpl @Inject constructor(
 //            preferences[stringPreferencesKey("customer_data")] = Json.encodeToString(customer)
 //        }
     }
+
 }

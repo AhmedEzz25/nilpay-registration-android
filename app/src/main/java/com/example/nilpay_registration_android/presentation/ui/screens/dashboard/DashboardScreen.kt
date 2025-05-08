@@ -9,6 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,12 +43,16 @@ fun DashboardScreen(navController: NavController) {
         {
             DashboardButton(
                 title = "Add Customer",
+                icon = Icons.Default.PersonAdd,
+                backgroundColor = Color(0xFF4CAF50),
                 onClick = { navController.navigate(Screen.AddCustomer.route) },
                 modifier = Modifier.weight(1f)
 
             )
             DashboardButton(
                 title = "Saved Customers",
+                icon = Icons.Default.Save,
+                backgroundColor = Color(0xFF2196F3),
                 onClick = { navController.navigate(Screen.SavedRequests.route) },
                 modifier = Modifier.weight(1f)
             )
@@ -58,13 +67,17 @@ fun DashboardScreen(navController: NavController) {
         ) {
             DashboardButton(
                 title = "Reports",
-                onClick = {  },
+                icon = Icons.Default.Assessment,
+                backgroundColor = Color(0xFFFF9800),
+                onClick = { navController.navigate(Screen.Reports.route) },
                 modifier = Modifier.weight(1f)
 
             )
             DashboardButton(
                 title = "Rejected",
                 onClick = {  },
+                icon = Icons.Default.Block,
+                backgroundColor = Color(0xFFF44336),
                 modifier = Modifier.weight(1f)
 
             )

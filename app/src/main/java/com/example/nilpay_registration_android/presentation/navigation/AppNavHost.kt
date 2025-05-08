@@ -12,6 +12,7 @@ import com.example.nilpay_registration_android.presentation.ui.screens.addcustom
 import com.example.nilpay_registration_android.presentation.ui.screens.dashboard.DashboardScreen
 import com.example.nilpay_registration_android.presentation.ui.screens.login.LoginScreen
 import com.example.nilpay_registration_android.presentation.ui.screens.login.LoginViewModel
+import com.example.nilpay_registration_android.presentation.ui.screens.reports.ReportsScreen
 import com.example.nilpay_registration_android.presentation.ui.screens.savedrequests.SavedCustomersViewModel
 import com.example.nilpay_registration_android.presentation.ui.screens.savedrequests.SavedRequestsScreen
 
@@ -46,7 +47,10 @@ fun AppNavHost(startDestination: String = Screen.Login.route) {
         }
         composable(Screen.SavedRequests.route) {
             val viewModel: SavedCustomersViewModel = hiltViewModel()
-            SavedRequestsScreen(viewModel)
+            SavedRequestsScreen(viewModel,navController)
+        }
+        composable(Screen.Reports.route) {
+            ReportsScreen()
         }
     }
 }

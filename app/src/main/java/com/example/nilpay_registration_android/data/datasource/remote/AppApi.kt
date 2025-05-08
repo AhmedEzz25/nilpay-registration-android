@@ -1,14 +1,22 @@
 package com.example.nilpay_registration_android.data.datasource.remote
 
 import com.example.nilpay_registration_android.core.data.WrappedResponse
+import com.example.nilpay_registration_android.core.data.WrappedResponseList
 import com.example.nilpay_registration_android.domain.model.Customer
+import com.example.nilpay_registration_android.domain.model.ReportsResponse
+import com.example.nilpay_registration_android.domain.model.UploadFileResponse
 import com.example.nilpay_registration_android.presentation.ui.screens.login.LoginRequest
 import com.example.nilpay_registration_android.presentation.ui.screens.login.LoginResponse
-import retrofit2.http.Body
-import retrofit2.http.POST
+import okhttp3.MultipartBody
 import retrofit2.Response
-import retrofit2.http.FormUrlEncoded
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.Multipart
+import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface AppApi {
     @POST("auth/login")
@@ -23,4 +31,14 @@ interface AppApi {
     @PUT("customers/update")
     suspend fun changeCustomerStatus(@Body customer: Customer): Response<WrappedResponse<String>>
 
+    @Multipart
+    @POST("common/files")
+    suspend fun uploadImage(
+        @Part file: MultipartBody.Part,
+    ): Response<UploadFileResponse>
+
+    @GET("customers")
+    suspend fun getReports(
+        @Query("status") status: String,
+        @Query("createdBy") createdBy: String): Response<WrappedResponseList<ReportsResponse>>
 }

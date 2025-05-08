@@ -14,7 +14,7 @@ data class Customer(
     val nationalId: String,
     val nationalIdPhotoPath: String? = null,
     val personalPhotoPath: String? = null,
-    val qrCodeNumber: String,
     val termsFilePath: String? = null,
+    val qrCodeNumber: String,
     val pin: String,
 )
