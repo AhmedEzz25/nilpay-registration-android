@@ -1,7 +1,13 @@
 <resources>
     <string name="app_name">nilpay-registration-android</string>
     <string name="enter_your_phone_number">Please enter your phone number</string>
-    <string name="mobile_number">Mobile number\n</string>
-    <string name="enter_your_password">Please enter your password\n</string>
-    <string name="password">Password\n</string>
+    <string name="mobile_number">Mobile number</string>
+    <string name="enter_your_password">Please enter your password</string>
+    <string name="password">Password</string>
+    <string name="error_invalid_user">Invalid email or password</string>
+    <string name="label_login">Login</string>
+    <string name="label_password">Password</string>
+    <string name="label_username">Username</string>
+    <string name="aws_cognito_identity_pool_id">YOUR_COGNITO_IDENTITY_POOL_ID</string>
+    <string name="aws_region">fra1</string>
 </resources>

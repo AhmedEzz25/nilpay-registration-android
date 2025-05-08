@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.delay
 
 @Composable
@@ -18,6 +19,13 @@ fun SplashScreen(onTimeout: () -> Unit) {
     }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Splash Screen", style = MaterialTheme.typography.headlineMedium)
+        Text("Registration Application", style = MaterialTheme.typography.headlineMedium)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SplashScreenPreview() {
+    SplashScreen {
     }
 }
