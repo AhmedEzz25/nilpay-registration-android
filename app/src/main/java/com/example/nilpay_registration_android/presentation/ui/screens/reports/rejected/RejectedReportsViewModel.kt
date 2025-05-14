@@ -1,16 +1,11 @@
-package com.example.nilpay_registration_android.presentation.ui.screens.reports
+package com.example.nilpay_registration_android.presentation.ui.screens.reports.rejected
 
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nilpay_registration_android.core.data.BaseResult
-import com.example.nilpay_registration_android.data.datasource.local.CustomerDao
-import com.example.nilpay_registration_android.data.datasource.local.entities.CustomerEntity
-import com.example.nilpay_registration_android.data.datasource.remote.AppApi
-import com.example.nilpay_registration_android.domain.model.ReportsResponse
+import com.example.nilpay_registration_android.domain.model.Report
+import com.example.nilpay_registration_android.domain.model.Status
 import com.example.nilpay_registration_android.domain.usecase.ReportsUseCase
-import com.example.nilpay_registration_android.presentation.ui.screens.login.LoginUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,14 +16,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ReportsViewModel @Inject constructor(
+class RejectedReportsViewModel @Inject constructor(
     reportsUseCase: ReportsUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(ReportsUiState())
-    val uiState: StateFlow<ReportsUiState> = _uiState.asStateFlow()
-
-    private val _reports = MutableStateFlow<List<ReportsResponse>>(emptyList())
-    val reports: StateFlow<List<ReportsResponse>> = _reports
+    private val _uiState = MutableStateFlow(RejectedReportsUiState())
+    val uiState: StateFlow<RejectedReportsUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -39,12 +31,10 @@ class ReportsViewModel @Inject constructor(
                     is BaseResult.DataState -> {
                         _uiState.update { it.copy(isLoading = false) }
                         result.items?.let { items ->
-                            if (items.success) {
-                                if (items.data.isNotEmpty()) {
-                                    _reports.value = items.data
-                                }
-
-                            }
+                            if (items.isNotEmpty())
+                                _uiState.update { it.copy(reports = items.filter { it.status == Status.Rejected.name }) }
+                            else
+                                _uiState.update { it.copy(isEmpty = true) }
                         }
                     }
 

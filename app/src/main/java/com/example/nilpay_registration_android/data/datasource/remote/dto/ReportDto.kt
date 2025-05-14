@@ -1,6 +1,6 @@
-package com.example.nilpay_registration_android.domain.model
+package com.example.nilpay_registration_android.data.datasource.remote.dto
 
-data class ReportsResponse(
+data class ReportDto(
     val id: String,
     val fullName: String,
     val dateOfBirth: String,
@@ -20,13 +20,13 @@ data class ReportsResponse(
     val pin: String,
     val createdAt: String,
     val createdBy: String,
-    val updatedAt: String,
+    val updatedAt: String?,
     val status: String,
     val acceptedAt: String?,
     val acceptedBy: String?,
     val rejectionReasons: List<String>,
-    val applicationUserId: String,
-    val isPending: Boolean,
-    val isAccepted: Boolean,
-    val isRejected: Boolean,
+    val applicationUserId: String?,
+    val isPending: Boolean?,
+    val isAccepted: Boolean?,
+    val isRejected: Boolean?,
 )

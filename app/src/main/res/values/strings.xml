@@ -10,4 +10,10 @@
     <string name="label_username">Username</string>
     <string name="aws_cognito_identity_pool_id">YOUR_COGNITO_IDENTITY_POOL_ID</string>
     <string name="aws_region">fra1</string>
+    <string name="label_title_add_customer">Add Customer</string>
+    <string name="label_title_rejected_customers">Rejected Customers</string>
+    <string name="label_title_accepted_customers">Accepted Customers</string>
+    <string name="label_title_saved_requests">Saved Requests</string>
+    <string name="msg_form_submitted_successfully">Form submitted Successfully</string>
+    <string name="msg_form_saved_successfully">Form saved Successfully</string>
 </resources>

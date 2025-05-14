@@ -1,7 +1,6 @@
 package com.example.nilpay_registration_android.data.datasource.local
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -18,6 +17,6 @@ interface CustomerDao {
     @Query("SELECT * FROM customers WHERE id = :id")
     suspend fun getCustomerById(id: Int): CustomerEntity?
 
-    @Delete
-    suspend fun deleteCustomer(customer: CustomerEntity)
+    @Query("DELETE FROM customers WHERE id = :id")
+    suspend fun deleteCustomerById(id: Int?)
 }

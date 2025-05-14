@@ -15,9 +15,9 @@ data class CustomerFormState(
     val other: String? = null,
     val nationalId: String = "",
     val personalPhotoFile: File? = null,
-    val personalPhotoPathURL: String? = null,
+    val personalPhotoPathURL: String = "",
     val nationalIdPhotoFile: File? = null,
-    val nationalIdPhotoPathURL: String? = null,
+    val nationalIdPhotoPathURL: String = "",
     val termsPhotoFile: File? = null,
     val termsPhotoPathURL: String? = null,
     val qrCodeValue: String = "test",
@@ -28,6 +28,7 @@ data class CustomerFormState(
 
     val isLoading: Boolean = false,
     val error: String? = null,
+
     val isSubmittedSucceeded: Boolean = false,
     val isSavedLocallySucceeded: Boolean = false,
     val repinError: String? = null,
@@ -43,5 +44,6 @@ data class CustomerFormState(
     val familyCountError: String? = null,
     val personalPhotoError: String? = null,
     val nationalIdPhotoError: String? = null,
+    val termsPhotoError: String? = null,
     val qrCodeError: String? = null,
 )

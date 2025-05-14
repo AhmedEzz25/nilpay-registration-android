@@ -35,7 +35,7 @@ class AddCustomerViewModel @Inject constructor(
     )
     val uiState: StateFlow<CustomerFormState> = _uiState.asStateFlow()
     fun onFieldChange(update: CustomerFormState.() -> CustomerFormState) {
-        _uiState.update { it.update() }
+        _uiState.update { it.update().copy(error = null) }
     }
 
     fun validateAndSubmit(): Boolean {
@@ -114,12 +114,16 @@ class AddCustomerViewModel @Inject constructor(
             "National ID photo is required."
         } else null
 
+        val termsPhotoError = if (state.nationalIdPhotoFile == null) {
+            isValid = false
+            "National ID photo is required."
+        } else null
         val qrCodeError = if (state.qrCodeValue.isBlank()) {
             isValid = false
             "QR code is required."
         } else null
 
-        val repinError = if (state.pin != state.repin) {
+        val rePinError = if (state.pin != state.repin) {
             isValid = false
             "PIN and Re-entered PIN must match."
         } else null
@@ -138,13 +142,14 @@ class AddCustomerViewModel @Inject constructor(
                 familyCountError = familyCountError,
                 personalPhotoError = personalPhotoError,
                 nationalIdPhotoError = nationalIdPhotoError,
+                termsPhotoError = termsPhotoError,
                 qrCodeError = qrCodeError,
-                repinError = repinError,
+                repinError = rePinError,
                 errorMessage = if (!isValid) "Please fix the errors above." else null,
-                submitted = isValid
+                submitted = isValid,
+                error = null
             )
         }
-
         return isValid
     }
 
@@ -153,20 +158,28 @@ class AddCustomerViewModel @Inject constructor(
     fun uploadCustomerImagesAndSubmit() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-
             val personalPhotoUrl =
                 _uiState.value.personalPhotoFile?.let { uploadFileUseCase.execute(it) }?.onStart {
                     _uiState.update {
                         it.copy(isLoading = true)
                     }
                 }?.collect { result ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = null,
-                            personalPhotoPathURL = result.body()!!.url
-                        )
+                    when (result) {
+                        is BaseResult.DataState -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    error = null,
+                                    personalPhotoPathURL = result.items!!.url
+                                )
+                            }
+                        }
+
+                        is BaseResult.ErrorState -> {
+                            _uiState.update { it.copy(personalPhotoError = result.errorResponse.message) }
+                        }
                     }
+
                 }
 
             val nationalIdPhotoUrl =
@@ -177,17 +190,53 @@ class AddCustomerViewModel @Inject constructor(
                         )
                     }
                 }?.collect { result ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = null,
-                            nationalIdPhotoPathURL = result.body()!!.url
-                        )
+                    when (result) {
+                        is BaseResult.DataState -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    error = null,
+                                    nationalIdPhotoPathURL = result.items!!.url
+                                )
+                            }
+                        }
+
+                        is BaseResult.ErrorState -> {
+                            _uiState.update { it.copy(nationalIdPhotoError = result.errorResponse.message) }
+
+                        }
                     }
+
                 }
 
+            val termsPhotoUrl =
+                _uiState.value.nationalIdPhotoFile?.let { uploadFileUseCase.execute(it) }?.onStart {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = true,
+                        )
+                    }
+                }?.collect { result ->
+                    when (result) {
+                        is BaseResult.DataState -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    error = null,
+                                    termsPhotoPathURL = result.items!!.url
+                                )
+                            }
+                        }
 
-            if (personalPhotoUrl == null || nationalIdPhotoUrl == null) {
+                        is BaseResult.ErrorState -> {
+                            _uiState.update { it.copy(termsPhotoError = result.errorResponse.message) }
+
+                        }
+                    }
+
+                }
+
+            if (personalPhotoUrl == null || nationalIdPhotoUrl == null || termsPhotoUrl == null) {
                 _uiState.update {
                     it.copy(
                         isLoading = false, error = "Failed to upload images. Please try again."
@@ -209,7 +258,7 @@ class AddCustomerViewModel @Inject constructor(
                     city = _uiState.value.city,
                     pin = _uiState.value.pin,
                     address = _uiState.value.address,
-                    dateOfBirth = convertToIsoFormat( _uiState.value.dob),
+                    dateOfBirth = convertToIsoFormat(_uiState.value.dob),
                     isFamily = _uiState.value.isFamily,
                     email = _uiState.value.email,
                     gender = _uiState.value.gender,
@@ -284,8 +333,8 @@ class AddCustomerViewModel @Inject constructor(
                 numFamily = state.numFamily,
                 other = state.other,
                 nationalId = state.nationalId,
-                personalPhotoPath = state.personalPhotoPathURL!!,
-                nationalIdPhotoPath = state.nationalIdPhotoPathURL!!,
+                personalPhotoPath = state.personalPhotoPathURL,
+                nationalIdPhotoPath = state.nationalIdPhotoPathURL,
                 qrCodeNumber = state.qrCodeValue,
                 pin = state.pin
             )
@@ -295,6 +344,12 @@ class AddCustomerViewModel @Inject constructor(
                     isLoading = false, error = null, isSavedLocallySucceeded = true
                 )
             }
+        }
+    }
+
+    fun deleteCustomerById(id: Int?) {
+        viewModelScope.launch {
+            customerDao.deleteCustomerById(id)
         }
     }
 }

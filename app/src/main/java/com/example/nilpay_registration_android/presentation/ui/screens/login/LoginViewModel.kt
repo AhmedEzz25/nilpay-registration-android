@@ -9,7 +9,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -39,10 +38,11 @@ class LoginViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is BaseResult.DataState -> {
-                            if (result.items!!.success) {
-                                result.items.data.token.let { token ->
+                            if (result.items != null) {
+                                result.items.token.let { token ->
                                     tokenManager.saveToken(token = token)
-                                    tokenManager.saveUserId(userId = result.items.data.userId)
+                                    tokenManager.saveUserId(userId = result.items.userId)
+                                    tokenManager.setLogIn()
                                 }
                                 _uiState.update {
                                     it.copy(
@@ -51,14 +51,7 @@ class LoginViewModel @Inject constructor(
                                         error = null
                                     )
                                 }
-                            } else
-                                _uiState.update {
-                                    it.copy(
-                                        isLoading = false,
-                                        isLoggedIn = false,
-                                        error = result.items.message
-                                    )
-                                }
+                            }
                         }
 
                         is BaseResult.ErrorState -> {
