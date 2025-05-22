@@ -10,7 +10,10 @@ import com.example.nilpay_registration_android.core.data.BaseResult
 import com.example.nilpay_registration_android.core.data.convertToIsoFormat
 import com.example.nilpay_registration_android.data.datasource.local.CustomerDao
 import com.example.nilpay_registration_android.data.datasource.local.entities.CustomerEntity
+import com.example.nilpay_registration_android.data.datasource.remote.dto.FileMetadataDto
+import com.example.nilpay_registration_android.domain.enums.FileType
 import com.example.nilpay_registration_android.domain.model.Customer
+import com.example.nilpay_registration_android.domain.model.UploadFileRequest
 import com.example.nilpay_registration_android.domain.usecase.SubmitCustomerUseCase
 import com.example.nilpay_registration_android.domain.usecase.UploadFileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -158,89 +161,126 @@ class AddCustomerViewModel @Inject constructor(
     fun uploadCustomerImagesAndSubmit() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            val personalPhotoUrl =
-                _uiState.value.personalPhotoFile?.let { uploadFileUseCase.execute(it) }?.onStart {
-                    _uiState.update {
-                        it.copy(isLoading = true)
-                    }
-                }?.collect { result ->
-                    when (result) {
-                        is BaseResult.DataState -> {
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    error = null,
-                                    personalPhotoPathURL = result.items!!.url
+
+            var personalSuccess = false
+            var nationalIdSuccess = false
+            var termsSuccess = false
+
+            _uiState.value.personalPhotoFile?.let {
+                uploadFileUseCase.execute(
+                    file = it, UploadFileRequest(
+                        customerEmail = _uiState.value.email,
+                        documentType = FileType.PersonalPhoto.fileType
+                    )
+                )
+            }?.onStart {
+                _uiState.update {
+                    it.copy(isLoading = true)
+                }
+            }?.collect { result ->
+                when (result) {
+                    is BaseResult.DataState -> {
+                        personalSuccess = true
+                        _uiState.update {
+                            it.copy(
+                                error = null,
+                                personalPhotoPathURL = FileMetadataDto(
+                                    key = result.items!!.key,
+                                    fileName = result.items.fileName,
+                                    size = result.items.size, type = result.items.type,
+                                    contentType = result.items.contentType
                                 )
-                            }
-                        }
-
-                        is BaseResult.ErrorState -> {
-                            _uiState.update { it.copy(personalPhotoError = result.errorResponse.message) }
+                            )
                         }
                     }
 
+                    is BaseResult.ErrorState -> {
+                        _uiState.update { it.copy(personalPhotoError = result.errorResponse.message) }
+                    }
                 }
 
-            val nationalIdPhotoUrl =
-                _uiState.value.nationalIdPhotoFile?.let { uploadFileUseCase.execute(it) }?.onStart {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = true,
-                        )
-                    }
-                }?.collect { result ->
-                    when (result) {
-                        is BaseResult.DataState -> {
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    error = null,
-                                    nationalIdPhotoPathURL = result.items!!.url
-                                )
-                            }
-                        }
+            }
 
-                        is BaseResult.ErrorState -> {
-                            _uiState.update { it.copy(nationalIdPhotoError = result.errorResponse.message) }
 
-                        }
-                    }
-
-                }
-
-            val termsPhotoUrl =
-                _uiState.value.nationalIdPhotoFile?.let { uploadFileUseCase.execute(it) }?.onStart {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = true,
-                        )
-                    }
-                }?.collect { result ->
-                    when (result) {
-                        is BaseResult.DataState -> {
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    error = null,
-                                    termsPhotoPathURL = result.items!!.url
-                                )
-                            }
-                        }
-
-                        is BaseResult.ErrorState -> {
-                            _uiState.update { it.copy(termsPhotoError = result.errorResponse.message) }
-
-                        }
-                    }
-
-                }
-
-            if (personalPhotoUrl == null || nationalIdPhotoUrl == null || termsPhotoUrl == null) {
+            _uiState.value.nationalIdPhotoFile?.let {
+                uploadFileUseCase.execute(
+                    file = it, UploadFileRequest(
+                        customerEmail = _uiState.value.email,
+                        documentType = FileType.NationalId.fileType
+                    )
+                )
+            }?.onStart {
                 _uiState.update {
                     it.copy(
-                        isLoading = false, error = "Failed to upload images. Please try again."
+                        isLoading = true,
                     )
+                }
+            }?.collect { result ->
+                when (result) {
+                    is BaseResult.DataState -> {
+                        nationalIdSuccess = true
+                        _uiState.update {
+                            it.copy(
+                                error = null, nationalIdPhotoPathURL = FileMetadataDto(
+                                    key = result.items!!.key,
+                                    fileName = result.items.fileName,
+                                    size = result.items.size, type = result.items.type,
+                                    contentType = result.items.contentType
+                                )
+                            )
+                        }
+                    }
+
+                    is BaseResult.ErrorState -> {
+                        _uiState.update { it.copy(nationalIdPhotoError = result.errorResponse.message) }
+
+                    }
+                }
+
+            }
+
+
+            _uiState.value.termsPhotoFile?.let {
+                uploadFileUseCase.execute(
+                    file = it, UploadFileRequest(
+                        customerEmail = _uiState.value.email, documentType = FileType.Terms.fileType
+                    )
+                )
+            }?.onStart {
+                _uiState.update {
+                    it.copy(
+                        isLoading = true,
+                    )
+                }
+            }?.collect { result ->
+                when (result) {
+                    is BaseResult.DataState -> {
+                        termsSuccess = true
+                        _uiState.update {
+                            it.copy(
+                                error = null, termsPhotoPathURL = FileMetadataDto(
+                                    key = result.items!!.key,
+                                    fileName = result.items.fileName,
+                                    size = result.items.size, type = result.items.type,
+                                    contentType = result.items.contentType
+                                )
+                            )
+                        }
+                    }
+
+                    is BaseResult.ErrorState -> {
+                        _uiState.update { it.copy(termsPhotoError = result.errorResponse.message) }
+
+                    }
+                }
+
+            }
+
+            _uiState.update { it.copy(isLoading = false) }
+
+            if (!personalSuccess || !nationalIdSuccess || !termsSuccess) {
+                _uiState.update {
+                    it.copy(error = "Failed to upload images. Please try again.")
                 }
                 return@launch
             }
@@ -267,9 +307,9 @@ class AddCustomerViewModel @Inject constructor(
                     familyMembersCount = _uiState.value.numFamily,
                     nationalId = _uiState.value.nationalId,
                     qrCodeNumber = _uiState.value.qrCodeValue,
-                    nationalIdPhotoPath = _uiState.value.nationalIdPhotoPathURL,
-                    personalPhotoPath = _uiState.value.personalPhotoPathURL,
-                    termsFilePath = _uiState.value.personalPhotoPathURL
+                    nationalIdPhoto = _uiState.value.nationalIdPhotoPathURL,
+                    personalPhoto = _uiState.value.personalPhotoPathURL,
+                    termsFile = _uiState.value.termsPhotoPathURL
                 )
             ).onStart {
                 _uiState.update {
@@ -280,7 +320,7 @@ class AddCustomerViewModel @Inject constructor(
             }.collect { result ->
                 when (result) {
                     is BaseResult.DataState -> {
-                        if (result.items!!.success) {
+                        if (result.items?.Status?.lowercase() == "success") {
                             _uiState.update {
                                 it.copy(
                                     isLoading = false, error = null, isSubmittedSucceeded = true
@@ -288,7 +328,7 @@ class AddCustomerViewModel @Inject constructor(
                             }
                         } else _uiState.update {
                             it.copy(
-                                isLoading = false, error = result.items.message
+                                isLoading = false, error = "Something went wrong"
                             )
                         }
                     }
@@ -322,6 +362,7 @@ class AddCustomerViewModel @Inject constructor(
             }
             val state = uiState.value
             val customer = CustomerEntity(
+                id = state.customerId ?: 0,
                 fullName = state.fullName,
                 dob = state.dob,
                 gender = state.gender,
@@ -333,12 +374,20 @@ class AddCustomerViewModel @Inject constructor(
                 numFamily = state.numFamily,
                 other = state.other,
                 nationalId = state.nationalId,
-                personalPhotoPath = state.personalPhotoPathURL,
-                nationalIdPhotoPath = state.nationalIdPhotoPathURL,
+//                personalPhotoPath = state.personalPhotoPathURL,
+//                nationalIdPhotoPath = state.nationalIdPhotoPathURL,
+//                termsPhotoPath = state.termsPhotoPathURL,
                 qrCodeNumber = state.qrCodeValue,
                 pin = state.pin
             )
-            customerDao.insertCustomer(customer)
+            if (state.customerId != null && state.customerId > 0) {
+                // Update existing
+                customerDao.updateCustomer(customer)
+            } else {
+                // Insert new
+                val newId = customerDao.insertCustomer(customer).toInt()
+                _uiState.update { it.copy(customerId = newId) } // Optional: store new ID in form state
+            }
             _uiState.update {
                 it.copy(
                     isLoading = false, error = null, isSavedLocallySucceeded = true

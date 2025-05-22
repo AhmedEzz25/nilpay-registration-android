@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.nilpay_registration_android.core.data.BaseResult
 import com.example.nilpay_registration_android.domain.model.Report
-import com.example.nilpay_registration_android.domain.model.Status
+import com.example.nilpay_registration_android.domain.enums.Status
 import com.example.nilpay_registration_android.domain.usecase.ReportsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,9 +31,18 @@ class RejectedReportsViewModel @Inject constructor(
                     is BaseResult.DataState -> {
                         _uiState.update { it.copy(isLoading = false) }
                         result.items?.let { items ->
-                            if (items.isNotEmpty())
-                                _uiState.update { it.copy(reports = items.filter { it.status == Status.Rejected.name }) }
-                            else
+                            if (items.isNotEmpty()) {
+                                items.filter { it.status == Status.Rejected.name }
+                                    .takeIf { it.isNotEmpty() }
+                                    ?.let { filtered ->
+                                        _uiState.update { it.copy(reports = filtered) }
+                                    } ?: _uiState.update {
+                                    it.copy(
+                                        reports = emptyList(),
+                                        isEmpty = true
+                                    )
+                                }
+                            } else
                                 _uiState.update { it.copy(isEmpty = true) }
                         }
                     }

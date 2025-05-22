@@ -39,10 +39,11 @@ class LoginViewModel @Inject constructor(
                     when (result) {
                         is BaseResult.DataState -> {
                             if (result.items != null) {
-                                result.items.token.let { token ->
-                                    tokenManager.saveToken(token = token)
+                                result.items.accessToken.let { token ->
+                                    tokenManager.saveAccessToken(token = token)
                                     tokenManager.saveUserId(userId = result.items.userId)
                                     tokenManager.setLogIn()
+                                    tokenManager.saveRefreshToken(refreshToken = result.items.refreshToken)
                                 }
                                 _uiState.update {
                                     it.copy(

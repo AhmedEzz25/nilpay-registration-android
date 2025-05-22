@@ -3,8 +3,8 @@ package com.example.nilpay_registration_android.data.repository
 import com.example.nilpay_registration_android.core.data.BaseResult
 import com.example.nilpay_registration_android.core.data.TokenManager
 import com.example.nilpay_registration_android.core.data.WrappedErrorResponse
-import com.example.nilpay_registration_android.core.data.WrappedResponse
 import com.example.nilpay_registration_android.data.datasource.remote.api.AppApi
+import com.example.nilpay_registration_android.data.datasource.remote.dto.CreateCustomerDto
 import com.example.nilpay_registration_android.data.mapper.toDomain
 import com.example.nilpay_registration_android.domain.model.Customer
 import com.example.nilpay_registration_android.domain.model.Report
@@ -12,6 +12,8 @@ import com.example.nilpay_registration_android.domain.model.UploadFile
 import com.example.nilpay_registration_android.domain.repository.AppRepository
 import com.example.nilpay_registration_android.domain.model.LoginRequest
 import com.example.nilpay_registration_android.domain.model.LoginResponse
+import com.example.nilpay_registration_android.domain.model.RefreshToken
+import com.example.nilpay_registration_android.domain.model.UploadFileRequest
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
@@ -39,77 +41,116 @@ class AppRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun submitCustomer(customer: Customer): Flow<BaseResult<WrappedResponse<String>>> {
-        return flow {
-            val response = api.submitCustomer(customer)
-            if (response.isSuccessful) {
-                val body = response.body()!!
-                emit(BaseResult.DataState(body))
-            } else {
-                val errorBody = response.errorBody()?.charStream()
-                val type = object : TypeToken<WrappedErrorResponse>() {}.type
-                val errorResponse: WrappedErrorResponse =
-                    Gson().fromJson(errorBody, type)
-                emit(BaseResult.ErrorState(errorResponse))
-            }
-        }
+    override suspend fun submitCustomer(customer: Customer): Flow<BaseResult<CreateCustomerDto>> {
+        return retryOn401(
+            apiCall = { api.submitCustomer(customer) },
+            onSuccess = { response -> BaseResult.DataState(response) }
+        )
     }
 
     override suspend fun login(
         username: String,
         password: String,
     ): Flow<BaseResult<LoginResponse>> {
-        return flow {
-            val response = api.login(LoginRequest(username, password))
-            if (response.isSuccessful) {
-                if (response.body()!!.success) {
-                    val body = response.body()!!.data.toDomain()
-                    emit(BaseResult.DataState(body))
-                }
-            } else {
-                val errorBody = response.errorBody()?.charStream()
-                val type = object : TypeToken<WrappedErrorResponse>() {}.type
-                val errorResponse: WrappedErrorResponse =
-                    Gson().fromJson(errorBody, type)
-                emit(BaseResult.ErrorState(errorResponse))
+        return retryOn401(
+            apiCall = { api.login(LoginRequest(username, password)) },
+            onSuccess = { response ->
+                val domainResponse = response.toDomain()
+                tokenManager.saveAccessToken(domainResponse.accessToken)
+                tokenManager.saveRefreshToken(domainResponse.refreshToken)
+                BaseResult.DataState(domainResponse)
             }
+        )
+    }
+
+
+    override suspend fun uploadFile(
+        file: URI,
+        uploadFileRequest: UploadFileRequest,
+    ): Flow<BaseResult<UploadFile>> {
+        val fileObject = File(file.path)
+        val requestFile = fileObject.asRequestBody("image/*".toMediaTypeOrNull())
+        val body = MultipartBody.Part.createFormData("file", fileObject.name, requestFile)
+
+        return retryOn401(
+            apiCall = {
+                api.uploadImage(
+                    file = body,
+                    documentType = uploadFileRequest.documentType,
+                    customerEmail = uploadFileRequest.customerEmail
+                )
+            },
+            onSuccess = { response ->
+                BaseResult.DataState(response.toDomain())
+            }
+        )
+    }
+
+
+//    override suspend fun getReports(
+//    ): Flow<BaseResult<List<Report>>> {
+//        return flow {
+//            val response = api.getReports(tokenManager.getUserId()!!)
+//            if (response.isSuccessful) {
+//                val body = response.body()?.data?.map { it.toDomain() } ?: emptyList()
+//                emit(BaseResult.DataState(body))
+//            } else {
+//                val errorBody = response.errorBody()?.charStream()
+//                val type = object : TypeToken<WrappedErrorResponse>() {}.type
+//                val errorResponse: WrappedErrorResponse =
+//                    Gson().fromJson(errorBody, type)
+//                emit(BaseResult.ErrorState(errorResponse))
+//            }
+//        }
+//    }
+
+    //    override suspend fun refreshToken(): Boolean {
+//        return flow {
+//            val response = api.refreshToken()
+//            if (response.isSuccessful) {
+//                val body = response.body()?.toDomain()
+//                emit(BaseResult.DataState(body))
+//            } else {
+//                val errorBody = response.errorBody()?.charStream()
+//                val type = object : TypeToken<WrappedErrorResponse>() {}.type
+//                val errorResponse: WrappedErrorResponse =
+//                    Gson().fromJson(errorBody, type)
+//                emit(BaseResult.ErrorState(errorResponse))
+//            }
+//        }
+//    }
+    override suspend fun refreshToken(): Boolean {
+        return try {
+            val response = api.refreshToken(
+                RefreshToken(
+                    accessToken = tokenManager.getAccessToken()!!,
+                    refreshToken = tokenManager.getRefreshToken()!!
+                )
+            )
+            if (response.isSuccessful) {
+                val newToken = response.body()!!.toDomain().accessToken
+                val refreshToken = response.body()!!.toDomain().refreshToken
+                tokenManager.saveAccessToken(newToken)
+                tokenManager.saveRefreshToken(refreshToken)
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            println("${e.message} error message")
+            false
         }
     }
 
-    override suspend fun uploadFile(file: URI): Flow<BaseResult<UploadFile>> {
-        return flow {
-            val fileObject = File(file.path)
-            val requestFile = fileObject.asRequestBody("image/*".toMediaTypeOrNull())
-            val body = MultipartBody.Part.createFormData("file", fileObject.name, requestFile)
 
-            val response = api.uploadImage(body)
-            if (response.isSuccessful) {
-                val uploadFile = response.body()!!.toDomain()
-                emit(BaseResult.DataState(uploadFile))
-            } else {
-                val errorBody = response.errorBody()?.charStream()
-                val type = object : TypeToken<WrappedErrorResponse>() {}.type
-                val errorResponse: WrappedErrorResponse = Gson().fromJson(errorBody, type)
-                emit(BaseResult.ErrorState(errorResponse))
+    override suspend fun getReports(): Flow<BaseResult<List<Report>>> {
+        return retryOn401(
+            apiCall = { api.getReports(tokenManager.getUserId()!!) },
+            onSuccess = { responseBody ->
+                val reports = responseBody.toDomain()
+                BaseResult.DataState(reports)
             }
-        }
-    }
-
-    override suspend fun getReports(
-    ): Flow<BaseResult<List<Report>>> {
-        return flow {
-            val response = api.getReports(tokenManager.getUserId()!!)
-            if (response.isSuccessful) {
-                val body = response.body()?.data?.map { it.toDomain() } ?: emptyList()
-                emit(BaseResult.DataState(body))
-            } else {
-                val errorBody = response.errorBody()?.charStream()
-                val type = object : TypeToken<WrappedErrorResponse>() {}.type
-                val errorResponse: WrappedErrorResponse =
-                    Gson().fromJson(errorBody, type)
-                emit(BaseResult.ErrorState(errorResponse))
-            }
-        }
+        )
     }
 
     private suspend fun saveToLocalStorage(customer: Customer) {
@@ -120,5 +161,35 @@ class AppRepositoryImpl @Inject constructor(
 //        }
     }
 
+    private fun <RawT, DomainT> retryOn401(
+        apiCall: suspend () -> retrofit2.Response<RawT>,
+        onSuccess: (RawT) -> BaseResult<DomainT>,
+    ): Flow<BaseResult<DomainT>> {
+        return flow {
+            var response = apiCall()
 
+            if (response.isSuccessful) {
+                emit(onSuccess(response.body()!!))
+            } else if (response.code() == 401) {
+                val refreshed = refreshToken()
+                if (refreshed) {
+                    response = apiCall()
+                    if (response.isSuccessful) {
+                        emit(onSuccess(response.body()!!))
+                        return@flow
+                    }
+                }
+
+                val errorBody = response.errorBody()?.charStream()
+                val type = object : TypeToken<WrappedErrorResponse>() {}.type
+                val errorResponse: WrappedErrorResponse = Gson().fromJson(errorBody, type)
+                emit(BaseResult.ErrorState(errorResponse))
+            } else {
+                val errorBody = response.errorBody()?.charStream()
+                val type = object : TypeToken<WrappedErrorResponse>() {}.type
+                val errorResponse: WrappedErrorResponse = Gson().fromJson(errorBody, type)
+                emit(BaseResult.ErrorState(errorResponse))
+            }
+        }
+    }
 }

@@ -1,8 +1,10 @@
 package com.example.nilpay_registration_android.presentation.ui.screens.addcustomer
 
+import com.example.nilpay_registration_android.data.datasource.remote.dto.FileMetadataDto
 import java.io.File
 
 data class CustomerFormState(
+    val customerId: Int? = null,
     val fullName: String = "",
     val dob: String = "",
     val gender: String = "",
@@ -14,12 +16,15 @@ data class CustomerFormState(
     val numFamily: Int = 0,
     val other: String? = null,
     val nationalId: String = "",
+    /*personal photo data*/
     val personalPhotoFile: File? = null,
-    val personalPhotoPathURL: String = "",
+    val personalPhotoPathURL: FileMetadataDto? = null,
+    /*national id photo data*/
     val nationalIdPhotoFile: File? = null,
-    val nationalIdPhotoPathURL: String = "",
+    val nationalIdPhotoPathURL: FileMetadataDto? = null,
+    /*terms photo data*/
     val termsPhotoFile: File? = null,
-    val termsPhotoPathURL: String? = null,
+    val termsPhotoPathURL: FileMetadataDto? = null,
     val qrCodeValue: String = "test",
     val pin: String = "",
     val repin: String = "",
@@ -31,6 +36,8 @@ data class CustomerFormState(
 
     val isSubmittedSucceeded: Boolean = false,
     val isSavedLocallySucceeded: Boolean = false,
+
+    /*errors */
     val repinError: String? = null,
     val pinError: String? = null,
     val fullNameError: String? = null,

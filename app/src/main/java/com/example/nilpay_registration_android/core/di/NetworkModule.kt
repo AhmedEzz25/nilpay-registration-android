@@ -30,7 +30,8 @@ object NetworkModule {
     @Singleton
     @Provides
     fun provideOkHttp(
-        requestInterceptor: RequestInterceptor, authInterceptor: AuthInterceptor,
+        requestInterceptor: AuthInterceptor,
+        authInterceptor: RequestInterceptor,
     ): OkHttpClient {
         return OkHttpClient.Builder().apply {
             connectTimeout(60, TimeUnit.SECONDS)

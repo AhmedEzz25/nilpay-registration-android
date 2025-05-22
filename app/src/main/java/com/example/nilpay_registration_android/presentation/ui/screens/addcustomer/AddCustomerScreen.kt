@@ -88,13 +88,9 @@ fun AddCustomerScreen(navController: NavController, onNavigateDashboard: () -> U
             Toast.LENGTH_LONG
         ).show()
         navController.popBackStack()
+        onNavigateDashboard()
     }
 
-//    val fromSavedRequests = remember {
-//        navController.previousBackStackEntry
-//            ?.savedStateHandle
-//            ?.get<Boolean>("fromSavedRequests") ?: false
-//    }
     val savedCustomerId = remember {
         navController.previousBackStackEntry
             ?.savedStateHandle
@@ -108,6 +104,7 @@ fun AddCustomerScreen(navController: NavController, onNavigateDashboard: () -> U
                 val customer = Gson().fromJson(json, CustomerFormState::class.java)
                 viewModel.onFieldChange {
                     copy(
+                        customerId = savedCustomerId,
                         fullName = customer.fullName,
                         dob = customer.dob,
                         gender = customer.gender,

@@ -4,12 +4,13 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.nilpay_registration_android.data.datasource.local.entities.CustomerEntity
 
 @Dao
 interface CustomerDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCustomer(customer: CustomerEntity)
+    suspend fun insertCustomer(customer: CustomerEntity):Long
 
     @Query("SELECT * FROM customers")
     suspend fun getAllCustomers(): List<CustomerEntity>
@@ -19,4 +20,8 @@ interface CustomerDao {
 
     @Query("DELETE FROM customers WHERE id = :id")
     suspend fun deleteCustomerById(id: Int?)
+
+    @Update
+    suspend fun updateCustomer(customer: CustomerEntity)
+
 }

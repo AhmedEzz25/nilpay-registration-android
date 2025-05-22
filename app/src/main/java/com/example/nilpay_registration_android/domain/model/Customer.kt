@@ -1,5 +1,7 @@
 package com.example.nilpay_registration_android.domain.model
 
+import com.example.nilpay_registration_android.data.datasource.remote.dto.FileMetadataDto
+
 data class Customer(
     val fullName: String,
     val dateOfBirth: String,
@@ -12,9 +14,9 @@ data class Customer(
     val familyMembersCount: Int,
     val other: String? = null,
     val nationalId: String,
-    val nationalIdPhotoPath: String? = null,
-    val personalPhotoPath: String? = null,
-    val termsFilePath: String? = null,
+    val nationalIdPhoto: FileMetadataDto? = null,
+    val personalPhoto: FileMetadataDto? = null,
+    val termsFile: FileMetadataDto? = null,
     val qrCodeNumber: String,
     val pin: String,
 )

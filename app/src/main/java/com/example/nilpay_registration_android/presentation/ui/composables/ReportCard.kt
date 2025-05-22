@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.nilpay_registration_android.domain.model.Report
-import com.example.nilpay_registration_android.domain.model.Status
+import com.example.nilpay_registration_android.domain.enums.Status
 import com.example.nilpay_registration_android.presentation.navigation.Screen
 import com.google.gson.Gson
 

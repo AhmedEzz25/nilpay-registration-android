@@ -5,8 +5,10 @@ import com.example.nilpay_registration_android.domain.model.LoginResponse
 
 fun LoginDto.toDomain(): LoginResponse {
     return LoginResponse(
-        token = token,
+        accessToken = accessToken,
         email = email,
-        userId = userId
+        userId = userId,
+        refreshToken = refreshToken,
+        roles = roles
     )
 }

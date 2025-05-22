@@ -1,4 +1,4 @@
-package com.example.nilpay_registration_android.domain.model
+package com.example.nilpay_registration_android.domain.enums
 
 enum class Status(val apiValue: String) {
     Rejected("Rejected"),

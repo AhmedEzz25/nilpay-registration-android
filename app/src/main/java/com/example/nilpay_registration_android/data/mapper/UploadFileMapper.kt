@@ -5,6 +5,10 @@ import com.example.nilpay_registration_android.domain.model.UploadFile
 
 fun UploadFileDto.toDomain(): UploadFile {
     return UploadFile(
-        url = this.url
+        key = key,
+        contentType = contentType,
+        size = size,
+        fileName = fileName,
+        type = type
     )
 }

@@ -17,14 +17,14 @@ fun ReportDto.toDomain(): Report {
         familyMembersCount = familyMembersCount,
         other = other,
         nationalId = nationalId,
-        nationalIdPhotoPath = nationalIdPhotoPath,
-        personalPhotoPath = personalPhotoPath,
+        nationalIdPhotoPath = nationalIdPhoto.key,
+        personalPhotoPath = personalPhoto.key,
         qrCodeNumber = qrCodeNumber,
-        termsFilePath = termsFilePath,
+        termsFilePath = termsFile.key,
         pin = pin,
-        createdAt = createdAt,
+        createdAt = createdOnUtc,
         createdBy = createdBy,
-        updatedAt = updatedAt,
+        updatedAt = modifiedOnUtc,
         status = status,
         acceptedAt = acceptedAt,
         acceptedBy = acceptedBy,
@@ -34,4 +34,8 @@ fun ReportDto.toDomain(): Report {
         isAccepted = isAccepted,
         isRejected = isRejected
     )
+}
+
+fun List<ReportDto>.toDomain(): List<Report> {
+    return this.map { it.toDomain() }
 }
